@@ -1,0 +1,26 @@
+#ifndef MINI_FACTORY_ANIMATION_H_
+#define MINI_FACTORY_ANIMATION_H_
+
+#include "Mini_Factory.h"
+#include "AnimationFrames.h"
+
+struct Spritesheet {
+	SDL_Texture* texture;
+	int rows;
+	int cols;
+	int length;
+};
+
+class Animation {
+public:
+	Animation(Spritesheet* spritesheet, AnimationFrames* animation_frames, int row, int col);
+	void render(SDL_Renderer* renderer, SDL_Rect* dst);
+
+private:
+	Spritesheet* m_spritesheet;
+	AnimationFrames* m_animation_frames;
+	int m_row;
+	int m_col;
+};
+
+#endif
