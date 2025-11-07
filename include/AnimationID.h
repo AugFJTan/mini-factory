@@ -1,0 +1,19 @@
+#ifndef MINI_FACTORY_ANIMATION_ID_H_
+#define MINI_FACTORY_ANIMATION_ID_H_
+
+typedef enum AnimationID {
+	BELT_UP,
+	BELT_DOWN,
+	BELT_LEFT,
+	BELT_RIGHT,
+	BELT_Q1_CW,
+	BELT_Q1_CCW,
+	BELT_Q2_CW,
+	BELT_Q2_CCW,
+	BELT_Q3_CW,
+	BELT_Q3_CCW,
+	BELT_Q4_CW,
+	BELT_Q4_CCW
+} AnimationID;
+
+#endif

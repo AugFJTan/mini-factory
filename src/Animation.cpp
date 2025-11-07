@@ -1,6 +1,6 @@
 #include "Animation.h"
 
-Animation::Animation(Spritesheet* spritesheet, AnimationFrames* animation_frames, int row, int col) :
+Animation::Animation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, int row, int col) :
 	m_spritesheet(spritesheet), m_animation_frames(animation_frames), m_row(row), m_col(col) {
 }
 

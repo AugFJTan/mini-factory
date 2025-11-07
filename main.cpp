@@ -1,6 +1,12 @@
 #include "Mini_Factory.h"
 #include "Animation.h"
 #include "AnimationFrames.h"
+#include "AnimationID.h"
+
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 SDL_Rect world_to_screen(int x, int y, int scale, int length) {
 	SDL_Rect rect;
@@ -9,6 +15,35 @@ SDL_Rect world_to_screen(int x, int y, int scale, int length) {
 	rect.w = scale * length;
 	rect.h = scale * length;
 	return rect;
+}
+
+void parse_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
+	std::ifstream file;
+	file.open("../config/anim_belt.txt");
+
+	std::string data;
+	bool first_line = true;
+	int frames, fps;
+	std::string anim_id;
+	int row, col;
+
+	while (std::getline(file, data)) {
+		if (data == "")
+			continue;
+		if (data[0] == '#')
+			continue;
+		std::istringstream ss(data);
+		if (first_line) {
+			ss >> frames >> fps;
+			animation_frames = std::make_shared<AnimationFrames>(frames, fps);
+			std::cout << "Frames = " << frames << ", FPS = " << fps << std::endl;
+			first_line = false;
+		} else {
+			ss >> anim_id >> row >> col;
+			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, row, col));
+			std::cout << anim_id << " @ (" << row << ", " << col << ")" << std::endl;
+		}
+	}
 }
 
 int main(int argc, char* args[]) {
@@ -44,23 +79,16 @@ int main(int argc, char* args[]) {
 		return 1;
 	}
 
-	AnimationFrames belt_anim_frames(4, 12);
-
 	Spritesheet spritesheet;
 	spritesheet.texture = texture;
 	spritesheet.cols = 10;
 	spritesheet.rows = 118;
 	spritesheet.length = 32;
 
-	Animation belt_up_anim(&spritesheet, &belt_anim_frames, 6, 2);
-	Animation belt_down_anim(&spritesheet, &belt_anim_frames, 5, 8);
-	Animation belt_left_anim(&spritesheet, &belt_anim_frames, 5, 4);
-	Animation belt_right_anim(&spritesheet, &belt_anim_frames, 5, 0);
+	sPtr<AnimationFrames> belt_anim_frames;
+	std::vector<uPtr<Animation>> belt_animations;
 
-	Animation belt_q1_cw_anim(&spritesheet, &belt_anim_frames, 12, 2);
-	Animation belt_q2_cw_anim(&spritesheet, &belt_anim_frames, 10, 6);
-	Animation belt_q3_cw_anim(&spritesheet, &belt_anim_frames, 9, 8);
-	Animation belt_q4_cw_anim(&spritesheet, &belt_anim_frames, 11, 4);
+	parse_file(&spritesheet, belt_anim_frames, belt_animations);
 
 	int scale = 2;
 	int length = spritesheet.length;
@@ -82,40 +110,40 @@ int main(int argc, char* args[]) {
 		SDL_SetRenderDrawColor(renderer, 0x7f, 0x7f, 0x7f, 0xff);  // Background
 		SDL_RenderClear(renderer);
 
-		belt_anim_frames.update(start);
+		belt_anim_frames->update(start);
 
 		SDL_Rect dst;
 		for (int i = 0; i < 3; i++) {
 			dst = world_to_screen(2+i, 1, scale, length);
-			belt_right_anim.render(renderer, &dst);
+			belt_animations[BELT_RIGHT]->render(renderer, &dst);
 		}
 
 		for (int i = 0; i < 3; i++) {
 			dst = world_to_screen(5, 2+i, scale, length);
-			belt_down_anim.render(renderer, &dst);
+			belt_animations[BELT_DOWN]->render(renderer, &dst);
 		}
 
 		for (int i = 0; i < 3; i++) {
 			dst = world_to_screen(2+i, 5, scale, length);
-			belt_left_anim.render(renderer, &dst);
+			belt_animations[BELT_LEFT]->render(renderer, &dst);
 		}
 
 		for (int i = 0; i < 3; i++) {
 			dst = world_to_screen(1, 2+i, scale, length);
-			belt_up_anim.render(renderer, &dst);
+			belt_animations[BELT_UP]->render(renderer, &dst);
 		}
 
 		dst = world_to_screen(5, 1, scale, length);
-		belt_q1_cw_anim.render(renderer, &dst);
+		belt_animations[BELT_Q1_CW]->render(renderer, &dst);
 
 		dst = world_to_screen(5, 5, scale, length);
-		belt_q2_cw_anim.render(renderer, &dst);
+		belt_animations[BELT_Q2_CW]->render(renderer, &dst);
 
 		dst = world_to_screen(1, 5, scale, length);
-		belt_q3_cw_anim.render(renderer, &dst);
+		belt_animations[BELT_Q3_CW]->render(renderer, &dst);
 
 		dst = world_to_screen(1, 1, scale, length);
-		belt_q4_cw_anim.render(renderer, &dst);
+		belt_animations[BELT_Q4_CW]->render(renderer, &dst);
 
 		SDL_RenderPresent(renderer);
 
