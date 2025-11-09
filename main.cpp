@@ -17,7 +17,7 @@ SDL_Rect world_to_screen(int x, int y, int scale, int length) {
 	return rect;
 }
 
-void parse_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
+void parse_animation_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
 	std::ifstream file;
 	file.open("../config/anim_belt.txt");
 
@@ -25,7 +25,7 @@ void parse_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frame
 	bool first_line = true;
 	int frames, fps;
 	std::string anim_id;
-	int row, col;
+	int x, y;
 
 	while (std::getline(file, data)) {
 		if (data == "")
@@ -39,9 +39,10 @@ void parse_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frame
 			std::cout << "Frames = " << frames << ", FPS = " << fps << std::endl;
 			first_line = false;
 		} else {
-			ss >> anim_id >> row >> col;
-			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, row, col));
-			std::cout << anim_id << " @ (" << row << ", " << col << ")" << std::endl;
+			ss >> anim_id >> x >> y;
+			SDL_Point pos = {x, y};
+			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, pos));
+			std::cout << anim_id << " @ (" << x << ", " << y << ")" << std::endl;
 		}
 	}
 }
@@ -88,7 +89,7 @@ int main(int argc, char* args[]) {
 	sPtr<AnimationFrames> belt_anim_frames;
 	std::vector<uPtr<Animation>> belt_animations;
 
-	parse_file(&spritesheet, belt_anim_frames, belt_animations);
+	parse_animation_file(&spritesheet, belt_anim_frames, belt_animations);
 
 	int scale = 2;
 	int length = spritesheet.length;

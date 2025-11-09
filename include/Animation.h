@@ -13,14 +13,13 @@ struct Spritesheet {
 
 class Animation {
 public:
-	Animation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, int row, int col);
+	Animation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, SDL_Point pos);
 	void render(SDL_Renderer* renderer, SDL_Rect* dst);
 
 private:
 	Spritesheet* m_spritesheet;
 	sPtr<AnimationFrames> m_animation_frames;
-	int m_row;
-	int m_col;
+	SDL_Point m_pos;
 };
 
 #endif
