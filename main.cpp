@@ -2,22 +2,25 @@
 #include "Animation.h"
 #include "AnimationFrames.h"
 #include "AnimationID.h"
+#include "Belt.h"
 
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 
-SDL_Rect world_to_screen(int x, int y, int scale, int length) {
+SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
 	SDL_Rect rect;
-	rect.x = x * scale * length;
-	rect.y = y * scale * length;
+	rect.x = pos.x * scale * length;
+	rect.y = pos.y * scale * length;
 	rect.w = scale * length;
 	rect.h = scale * length;
 	return rect;
 }
 
-void parse_animation_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
+void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, AnimationID>& animation_lookup,
+	sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
 	std::ifstream file;
 	file.open("../config/anim_belt.txt");
 
@@ -26,6 +29,7 @@ void parse_animation_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& anima
 	int frames, fps;
 	std::string anim_id;
 	int x, y;
+	int n = 0;
 
 	while (std::getline(file, data)) {
 		if (data == "")
@@ -42,8 +46,27 @@ void parse_animation_file(Spritesheet* spritesheet, sPtr<AnimationFrames>& anima
 			ss >> anim_id >> x >> y;
 			SDL_Point pos = {x, y};
 			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, pos));
+			animation_lookup[anim_id] = static_cast<AnimationID>(n);
 			std::cout << anim_id << " @ (" << x << ", " << y << ")" << std::endl;
+			n++;
 		}
+	}
+}
+
+void parse_layout_file(std::vector<uPtr<Belt>>& belts, std::map<std::string, AnimationID>& animation_lookup) {
+	std::ifstream file;
+	file.open("../config/layout.txt");
+
+	std::string data;
+	std::string anim_id;
+	int x, y;
+
+	while (std::getline(file, data)) {
+		std::istringstream ss(data);
+		ss >> anim_id >> x >> y;
+		SDL_Point pos = {x, y};
+		belts.push_back(std::make_unique<Belt>(pos, animation_lookup[anim_id]));
+		std::cout << anim_id << " " << "(" << x << ", " << y << ")" << std::endl;
 	}
 }
 
@@ -88,8 +111,11 @@ int main(int argc, char* args[]) {
 
 	sPtr<AnimationFrames> belt_anim_frames;
 	std::vector<uPtr<Animation>> belt_animations;
+	std::map<std::string, AnimationID> animation_lookup;
+	std::vector<uPtr<Belt>> belts;
 
-	parse_animation_file(&spritesheet, belt_anim_frames, belt_animations);
+	parse_animation_file(&spritesheet, animation_lookup, belt_anim_frames, belt_animations);
+	parse_layout_file(belts, animation_lookup);
 
 	int scale = 2;
 	int length = spritesheet.length;
@@ -113,38 +139,10 @@ int main(int argc, char* args[]) {
 
 		belt_anim_frames->update(start);
 
-		SDL_Rect dst;
-		for (int i = 0; i < 3; i++) {
-			dst = world_to_screen(2+i, 1, scale, length);
-			belt_animations[BELT_RIGHT]->render(renderer, &dst);
+		for (const std::unique_ptr<Belt>& belt : belts) {
+			SDL_Rect dst = world_to_screen(belt->getPos(), scale, length);
+			belt_animations[belt->getAnimationID()]->render(renderer, &dst);
 		}
-
-		for (int i = 0; i < 3; i++) {
-			dst = world_to_screen(5, 2+i, scale, length);
-			belt_animations[BELT_DOWN]->render(renderer, &dst);
-		}
-
-		for (int i = 0; i < 3; i++) {
-			dst = world_to_screen(2+i, 5, scale, length);
-			belt_animations[BELT_LEFT]->render(renderer, &dst);
-		}
-
-		for (int i = 0; i < 3; i++) {
-			dst = world_to_screen(1, 2+i, scale, length);
-			belt_animations[BELT_UP]->render(renderer, &dst);
-		}
-
-		dst = world_to_screen(5, 1, scale, length);
-		belt_animations[BELT_Q1_CW]->render(renderer, &dst);
-
-		dst = world_to_screen(5, 5, scale, length);
-		belt_animations[BELT_Q2_CW]->render(renderer, &dst);
-
-		dst = world_to_screen(1, 5, scale, length);
-		belt_animations[BELT_Q3_CW]->render(renderer, &dst);
-
-		dst = world_to_screen(1, 1, scale, length);
-		belt_animations[BELT_Q4_CW]->render(renderer, &dst);
 
 		SDL_RenderPresent(renderer);
 

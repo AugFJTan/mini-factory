@@ -1,11 +1,11 @@
 #ifndef MINI_FACTORY_BELT_H_
 #define MINI_FACTORY_BELT_H_
 
-#include "Tile.h"
+#include "AnimatedTile.h"
 
-class Belt : public Tile {
+class Belt : public AnimatedTile {
 public:
-	Belt(SDL_FPoint pos);
+	Belt(SDL_Point pos, AnimationID animation_id);
 };
 
 #endif

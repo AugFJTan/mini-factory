@@ -6,6 +6,7 @@ add_executable(Mini_Factory
                src/Animation.cpp
                src/AnimationFrames.cpp
                src/Tile.cpp
+               src/AnimatedTile.cpp
                src/Belt.cpp)
 
 target_include_directories(Mini_Factory PRIVATE include)
