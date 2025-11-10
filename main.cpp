@@ -3,12 +3,14 @@
 #include "AnimationFrames.h"
 #include "AnimationID.h"
 #include "Belt.h"
+#include "Pathfinding.h"
 
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <map>
+#include "Util.h"
 
 SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
 	SDL_Rect rect;
@@ -17,10 +19,6 @@ SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
 	rect.w = scale * length;
 	rect.h = scale * length;
 	return rect;
-}
-
-int to_index(SDL_Point pos) {
-	return pos.y * MAP_WIDTH + pos.x;
 }
 
 void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, AnimationID>& animation_lookup,
@@ -50,14 +48,13 @@ void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, Animat
 			ss >> anim_id >> x >> y;
 			SDL_Point pos = {x, y};
 			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, pos));
-			animation_lookup[anim_id] = static_cast<AnimationID>(n);
+			animation_lookup[anim_id] = static_cast<AnimationID>(n++);
 			std::cout << anim_id << " @ (" << x << ", " << y << ")" << std::endl;
-			n++;
 		}
 	}
 }
 
-void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::string, AnimationID>& animation_lookup) {
+void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::string, AnimationID>& animation_lookup, Path& path) {
 	std::ifstream file;
 	file.open("../config/layout.txt");
 
@@ -70,6 +67,7 @@ void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::strin
 		ss >> anim_id >> x >> y;
 		SDL_Point pos = {x, y};
 		map[to_index(pos)] = std::make_unique<Belt>(animation_lookup[anim_id]);
+		path.setTileType(pos, BELT);
 		std::cout << anim_id << " " << "(" << x << ", " << y << ")" << std::endl;
 	}
 }
@@ -117,9 +115,13 @@ int main(int argc, char* args[]) {
 	std::vector<uPtr<Animation>> belt_animations;
 	std::map<std::string, AnimationID> animation_lookup;
 	std::vector<uPtr<AnimatedTile>> map(MAP_WIDTH * MAP_HEIGHT);
+	Path path;
 
 	parse_animation_file(&spritesheet, animation_lookup, belt_anim_frames, belt_animations);
-	parse_layout_file(map, animation_lookup);
+	parse_layout_file(map, animation_lookup, path);
+
+	path.traverse(map);
+	std::vector<Node*> belt_paths = path.getPaths();
 
 	int scale = 2;
 	int length = spritesheet.length;
@@ -146,11 +148,26 @@ int main(int argc, char* args[]) {
 		for (int y = 0; y < MAP_HEIGHT; y++) {
 			for (int x = 0; x < MAP_WIDTH; x++) {
 				SDL_Point pos = {x, y};
-				Belt *belt = dynamic_cast<Belt*>(map[to_index(pos)].get());
+				Belt *belt = static_cast<Belt*>(map[to_index(pos)].get());
 				if (belt == nullptr)
 					continue;
 				SDL_Rect dst = world_to_screen(pos, scale, length);
 				belt_animations[belt->getAnimationID()]->render(renderer, &dst);
+			}
+		}
+
+		for (int i = 0; i < belt_paths.size(); i++) {
+			Node* current = belt_paths[i];
+			while (current->next != nullptr) {
+				SDL_Point a = current->pos;
+				SDL_Point b = current->next->pos;
+				a.x = (a.x * length + length / 2) * scale;
+				a.y = (a.y * length + length / 2) * scale;
+				b.x = (b.x * length + length / 2) * scale;
+				b.y = (b.y * length + length / 2) * scale;
+				SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
+				SDL_RenderDrawLine(renderer, a.x, a.y, b.x, b.y);
+				current = current->next;
 			}
 		}
 
