@@ -19,6 +19,10 @@ SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
 	return rect;
 }
 
+int to_index(SDL_Point pos) {
+	return pos.y * MAP_WIDTH + pos.x;
+}
+
 void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, AnimationID>& animation_lookup,
 	sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
 	std::ifstream file;
@@ -53,7 +57,7 @@ void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, Animat
 	}
 }
 
-void parse_layout_file(std::vector<uPtr<Belt>>& belts, std::map<std::string, AnimationID>& animation_lookup) {
+void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::string, AnimationID>& animation_lookup) {
 	std::ifstream file;
 	file.open("../config/layout.txt");
 
@@ -65,7 +69,7 @@ void parse_layout_file(std::vector<uPtr<Belt>>& belts, std::map<std::string, Ani
 		std::istringstream ss(data);
 		ss >> anim_id >> x >> y;
 		SDL_Point pos = {x, y};
-		belts.push_back(std::make_unique<Belt>(pos, animation_lookup[anim_id]));
+		map[to_index(pos)] = std::make_unique<Belt>(animation_lookup[anim_id]);
 		std::cout << anim_id << " " << "(" << x << ", " << y << ")" << std::endl;
 	}
 }
@@ -112,10 +116,10 @@ int main(int argc, char* args[]) {
 	sPtr<AnimationFrames> belt_anim_frames;
 	std::vector<uPtr<Animation>> belt_animations;
 	std::map<std::string, AnimationID> animation_lookup;
-	std::vector<uPtr<Belt>> belts;
+	std::vector<uPtr<AnimatedTile>> map(MAP_WIDTH * MAP_HEIGHT);
 
 	parse_animation_file(&spritesheet, animation_lookup, belt_anim_frames, belt_animations);
-	parse_layout_file(belts, animation_lookup);
+	parse_layout_file(map, animation_lookup);
 
 	int scale = 2;
 	int length = spritesheet.length;
@@ -139,9 +143,15 @@ int main(int argc, char* args[]) {
 
 		belt_anim_frames->update(start);
 
-		for (const std::unique_ptr<Belt>& belt : belts) {
-			SDL_Rect dst = world_to_screen(belt->getPos(), scale, length);
-			belt_animations[belt->getAnimationID()]->render(renderer, &dst);
+		for (int y = 0; y < MAP_HEIGHT; y++) {
+			for (int x = 0; x < MAP_WIDTH; x++) {
+				SDL_Point pos = {x, y};
+				Belt *belt = dynamic_cast<Belt*>(map[to_index(pos)].get());
+				if (belt == nullptr)
+					continue;
+				SDL_Rect dst = world_to_screen(pos, scale, length);
+				belt_animations[belt->getAnimationID()]->render(renderer, &dst);
+			}
 		}
 
 		SDL_RenderPresent(renderer);

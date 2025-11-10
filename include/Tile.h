@@ -11,13 +11,12 @@ typedef enum TileType {
 
 class Tile {
 public:
-	Tile(TileType type, SDL_Point pos);
+	Tile(TileType type);
+	virtual ~Tile() = default;
 	TileType getType();
-	SDL_Point getPos();
 
 private:
 	TileType m_type;
-	SDL_Point m_pos;
 };
 
 #endif

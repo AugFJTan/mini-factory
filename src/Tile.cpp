@@ -1,12 +1,8 @@
 #include "Tile.h"
 
-Tile::Tile(TileType type, SDL_Point pos) : m_type(type), m_pos(pos) {
+Tile::Tile(TileType type) : m_type(type) {
 }
 
 TileType Tile::getType() {
 	return m_type;
-}
-
-SDL_Point Tile::getPos() {
-	return m_pos;
 }

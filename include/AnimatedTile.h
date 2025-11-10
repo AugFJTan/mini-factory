@@ -6,7 +6,8 @@
 
 class AnimatedTile : public Tile {
 public:
-	AnimatedTile(TileType type, SDL_Point pos, AnimationID animation_id);
+	AnimatedTile(TileType type, AnimationID animation_id);
+	virtual ~AnimatedTile() = default;
 	AnimationID getAnimationID();
 
 private:

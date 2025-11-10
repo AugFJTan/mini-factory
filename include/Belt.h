@@ -5,7 +5,7 @@
 
 class Belt : public AnimatedTile {
 public:
-	Belt(SDL_Point pos, AnimationID animation_id);
+	Belt(AnimationID animation_id);
 };
 
 #endif

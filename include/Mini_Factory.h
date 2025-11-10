@@ -11,6 +11,9 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
+#define MAP_WIDTH 10
+#define MAP_HEIGHT 8
+
 template<class T> using uPtr = std::unique_ptr<T>;
 template<class T> using sPtr = std::shared_ptr<T>;
 
