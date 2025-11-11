@@ -23,6 +23,7 @@ public:
 
 private:
 	Node m_nodes[MAP_WIDTH * MAP_HEIGHT];
+	void traversePath(std::vector<uPtr<AnimatedTile>>& map, Node* start);
 };
 
 #endif

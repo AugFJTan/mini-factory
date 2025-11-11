@@ -41,36 +41,3 @@ bool belt_forward_connected(SDL_Point pos_a, AnimationID anim_a, SDL_Point pos_b
 	}
 	return result;
 }
-
-bool belt_backward_connected(SDL_Point pos_a, AnimationID anim_a, SDL_Point pos_b, AnimationID anim_b) {
-	bool result = false;
-	switch(anim_a) {
-		case BELT_UP:
-		case BELT_UP_LEFT:
-		case BELT_UP_RIGHT:
-			result = (pos_b.x == pos_a.x && pos_b.y == pos_a.y+1) &&
-				(anim_b == BELT_UP || anim_b == BELT_LEFT_UP || anim_b == BELT_RIGHT_UP);
-			break;
-		case BELT_DOWN:
-		case BELT_DOWN_LEFT:
-		case BELT_DOWN_RIGHT:
-			result = (pos_b.x == pos_a.x && pos_b.y == pos_a.y-1) &&
-				(anim_b == BELT_DOWN || anim_b == BELT_LEFT_DOWN || anim_b == BELT_RIGHT_DOWN);
-			break;
-		case BELT_LEFT:
-		case BELT_LEFT_UP:
-		case BELT_LEFT_DOWN:
-			result = (pos_b.x == pos_a.x+1 && pos_b.y == pos_a.y) &&
-				(anim_b == BELT_LEFT || anim_b == BELT_UP_LEFT || anim_b == BELT_DOWN_LEFT);
-			break;
-		case BELT_RIGHT:
-		case BELT_RIGHT_UP:
-		case BELT_RIGHT_DOWN:
-			result = (pos_b.x == pos_a.x-1 && pos_b.y == pos_a.y) &&
-				(anim_b == BELT_RIGHT || anim_b == BELT_UP_RIGHT || anim_b == BELT_DOWN_RIGHT);
-			break;
-		default:
-			break;
-	}
-	return result;
-}
