@@ -26,6 +26,7 @@ void Path::traverse(std::vector<uPtr<AnimatedTile>>& map) {
 		}
 	}
 
+	// TODO Differentiate between different paths
 	while(traversable.size() > 0) {
 		Node* current = traversable.front();
 		traversable.pop();
@@ -62,12 +63,13 @@ void Path::traverse(std::vector<uPtr<AnimatedTile>>& map) {
 							current->next = next;
 							next->previous = current;
 							queue.push(next);
-						} else if (belt_backward_connected(current->pos, current_anim, next->pos, next_anim)) {
+						}
+						/*else if (next != start && belt_backward_connected(current->pos, current_anim, next->pos, next_anim)) {
 							printf("(%i, %i) is backward connected to (%i, %i)\n", current->pos.x, current->pos.y, next->pos.x, next->pos.y);
 							current->previous = next;
 							next->next = current;
 							queue.push(next);
-						}
+						}*/
 					}
 				}
 			}

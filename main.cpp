@@ -4,6 +4,7 @@
 #include "AnimationID.h"
 #include "Belt.h"
 #include "Pathfinding.h"
+#include "ItemPath.h"
 
 #include <fstream>
 #include <sstream>
@@ -72,6 +73,34 @@ void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::strin
 	}
 }
 
+void parse_item_lanes_file(std::vector<std::vector<SDL_Point>>& belt_lane_offsets) {
+	std::ifstream file;
+	file.open("../config/item_lanes.txt");
+
+	std::string data;
+	std::string lane_id, points;
+
+	while (std::getline(file, data)) {
+		std::istringstream ss(data);
+		ss >> lane_id >> points;
+		std::cout << "Lane: " << lane_id << " Pos: " << points << std::endl;
+		size_t idx = 0, lbracket = 0, rbracket = 0;
+		std::vector<SDL_Point> offsets;
+		while(idx < points.length()) {
+			lbracket = points.find('(', idx);
+			rbracket = points.find(')', idx);
+			std::string coord = points.substr(lbracket+1, rbracket-lbracket-1);
+			size_t comma = coord.find(',');
+			SDL_Point pos;
+			pos.x = std::stoi(coord.substr(0, comma));
+			pos.y = std::stoi(coord.substr(comma+1));
+			offsets.push_back(pos);
+			idx = rbracket + 2;
+		}
+		belt_lane_offsets.push_back(offsets);
+	}
+}
+
 int main(int argc, char* args[]) {
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
@@ -123,6 +152,16 @@ int main(int argc, char* args[]) {
 	path.traverse(map);
 	std::vector<Node*> belt_paths = path.getPaths();
 
+	std::vector<std::vector<SDL_Point>> belt_lane_offsets;
+	parse_item_lanes_file(belt_lane_offsets);
+
+	std::vector<ItemPath> item_paths;
+	for (int i = 0; i < belt_paths.size(); i++) {
+		ItemPath item_path;
+		item_path.update(map, belt_lane_offsets, belt_paths[i]);
+		item_paths.push_back(item_path);
+	}
+
 	int scale = 2;
 	int length = spritesheet.length;
 
@@ -169,6 +208,11 @@ int main(int argc, char* args[]) {
 				SDL_RenderDrawLine(renderer, a.x, a.y, b.x, b.y);
 				current = current->next;
 			}
+		}
+
+		for (int i = 0; i < item_paths.size(); i++) {
+			item_paths[i].drawLaneA(renderer);
+			item_paths[i].drawLaneB(renderer);
 		}
 
 		SDL_RenderPresent(renderer);

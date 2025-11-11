@@ -9,7 +9,8 @@ add_executable(Mini_Factory
                src/Tile.cpp
                src/AnimatedTile.cpp
                src/Pathfinding.cpp
-               src/Belt.cpp)
+               src/Belt.cpp
+               src/ItemPath.cpp)
 
 target_include_directories(Mini_Factory PRIVATE include)
 
