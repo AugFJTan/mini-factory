@@ -162,8 +162,15 @@ int main(int argc, char* args[]) {
 		item_paths.push_back(item_path);
 	}
 
+	int total_distance = item_paths[0].getTotalDistance();
+
 	int scale = 2;
 	int length = spritesheet.length;
+
+	SDL_Rect item_frame = {3 * length, 2 * length, 12, 11};
+	float distance = 0;
+	Uint64 previous = SDL_GetTicks64();
+	int pixels_per_sec = 45;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event)) {
@@ -214,6 +221,15 @@ int main(int argc, char* args[]) {
 			item_paths[i].drawLaneA(renderer);
 			item_paths[i].drawLaneB(renderer);
 		}
+
+		if (distance > total_distance)
+			distance = 0;
+
+		distance += (start - previous) / (1000.f / pixels_per_sec);
+		previous = start;
+
+		item_paths[0].drawItemLaneA(renderer, spritesheet.texture, &item_frame, (int)distance);
+		item_paths[0].drawItemLaneB(renderer, spritesheet.texture, &item_frame, (int)distance);
 
 		SDL_RenderPresent(renderer);
 

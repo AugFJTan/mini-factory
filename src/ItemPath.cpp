@@ -1,18 +1,20 @@
 #include "ItemPath.h"
 #include "Util.h"
 
-#define BELT_LENGTH 32
-#define BELT_TOP_OFFSET 10
-#define BELT_BOTTOM_OFFSET 30
-#define BELT_LEFT_OFFSET 10
-#define BELT_RIGHT_OFFSET 20
+SDL_Point midpoint(SDL_Rect *item_frame) {
+	return {item_frame->w / 2, item_frame->h / 2};
+}
+
+int calc_distance(SDL_Point a, SDL_Point b) {
+	return abs(a.x - b.x) + abs(a.y - b.y);
+}
 
 ItemPath::ItemPath() {
 }
 
 void ItemPath::addPoints(bool first, bool lane_a, Node* node, int length, std::vector<SDL_Point>& offsets) {
 	int start_idx = first ? 0 : 1;
-	for (int i = 0; i < offsets.size(); i++) {
+	for (int i = start_idx; i < offsets.size(); i++) {
 		SDL_Point offset = offsets[i];
 		SDL_Point point = {node->pos.x * length + offset.x, node->pos.y * length + offset.y};
 		if (lane_a)
@@ -28,10 +30,6 @@ void ItemPath::update(std::vector<uPtr<AnimatedTile>>& map, std::vector<std::vec
 	AnimationID previous_anim = start_anim;
 
 	int length = 32;
-	/*int top_offset = 10;
-	int bottom_offset = 20;
-	int left_offset = 10;
-	int right_offset = 20;*/
 
 	bool first = true;
 	bool lane_a = true, lane_b = false;
@@ -96,12 +94,19 @@ void ItemPath::update(std::vector<uPtr<AnimatedTile>>& map, std::vector<std::vec
 	}
 }
 
-void ItemPath::drawLaneA(SDL_Renderer* renderer) {
-	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
+int ItemPath::getTotalDistance() {
+	int total_distance = 0;
+	for (int i = 0; i < m_lane_a.size()-1; i++) {
+		total_distance += calc_distance(m_lane_a[i], m_lane_a[i+1]);
+	}
+	return total_distance;
+}
+
+void ItemPath::drawLane(std::vector<SDL_Point>& lane, SDL_Renderer* renderer) {
 	int scale = 2;
-	SDL_Point previous = m_lane_a[0];
-	for (int i = 1; i < m_lane_a.size(); i++) {
-		SDL_Point current = m_lane_a[i];
+	SDL_Point previous = lane[0];
+	for (int i = 1; i < lane.size(); i++) {
+		SDL_Point current = lane[i];
 		SDL_Point start = {previous.x * scale, previous.y * scale};
 		SDL_Point end = {current.x * scale, current.y * scale};
 		SDL_RenderDrawLine(renderer, start.x, start.y, end.x, end.y);
@@ -109,15 +114,70 @@ void ItemPath::drawLaneA(SDL_Renderer* renderer) {
 	}
 }
 
+void ItemPath::drawLaneA(SDL_Renderer* renderer) {
+	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
+	drawLane(m_lane_a, renderer);
+}
+
 void ItemPath::drawLaneB(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0xff, 0xff);
+	drawLane(m_lane_b, renderer);
+}
+
+void ItemPath::drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance) {
+	drawItem(m_lane_a, renderer, texture, item_frame, distance);
+}
+
+void ItemPath::drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance) {
+	drawItem(m_lane_b, renderer, texture, item_frame, distance);
+}
+
+void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance) {
+	SDL_Point m = midpoint(item_frame);
 	int scale = 2;
-	SDL_Point previous = m_lane_b[0];
-	for (int i = 1; i < m_lane_b.size(); i++) {
-		SDL_Point current = m_lane_b[i];
-		SDL_Point start = {previous.x * scale, previous.y * scale};
-		SDL_Point end = {current.x * scale, current.y * scale};
-		SDL_RenderDrawLine(renderer, start.x, start.y, end.x, end.y);
-		previous = current;
+
+	int index = -1;
+	int offset = 0;
+	for (int i = 0; i < lane.size()-1; i++) {
+		offset += calc_distance(lane[i], lane[i+1]);
+		if (offset >= distance) {
+			index = i;
+			break;
+		}
 	}
+	if (index == -1)
+		return;
+
+	SDL_Point current = lane[index];
+	SDL_Point next = lane[index+1];
+
+	int dx = 0, dy = 0;
+	int adjust = calc_distance(current, next) - (offset - distance);
+	if (current.y == next.y) {
+		if (current.x < next.x)  // right
+			dx = adjust;
+		else  // left
+			dx = -adjust;
+	}
+	if (current.x == next.x) {
+		if (current.y < next.y)  // down
+			dy = adjust;
+		else  // up
+			dy = -adjust;
+	}
+
+	SDL_Rect dst;
+	dst.x = current.x + dx - m.x;
+	dst.y = current.y + dy - m.y;
+	dst.w = item_frame->w;
+	dst.h = item_frame->h;
+
+	// printf("(%i, %i)\n", dst.x, dst.y);
+
+	dst.x *= scale;
+	dst.y *= scale;
+	dst.w *= scale;
+	dst.h *= scale;
+
+	SDL_RenderCopy(renderer, texture, item_frame, &dst);
 }
