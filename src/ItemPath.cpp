@@ -16,10 +16,10 @@ void ItemPath::addPoints(bool first, bool lane_a, Node* node, int length, std::v
 	}
 }
 
-void ItemPath::update(std::vector<uPtr<Tile>>& map, std::vector<std::vector<SDL_Point>>& belt_lane_offsets, Node* path) {
+void ItemPath::update(Tile map[], std::vector<std::vector<SDL_Point>>& belt_lane_offsets, Node* path) {
 	Node* current = path;
-	AnimatedTile* start_tile = static_cast<AnimatedTile*>(map[to_index(current->pos)].get());
-	TileID previous_tile_id = start_tile->getAnimationID();
+	Tile start_tile = map[to_index(current->pos)];
+	TileID previous_tile_id = start_tile.getID();
 
 	int length = 32;
 
@@ -27,8 +27,8 @@ void ItemPath::update(std::vector<uPtr<Tile>>& map, std::vector<std::vector<SDL_
 	bool lane_a = true, lane_b = false;
 
 	while(current != nullptr) {
-		AnimatedTile* current_tile = static_cast<AnimatedTile*>(map[to_index(current->pos)].get());
-		TileID current_tile_id = current_tile->getAnimationID();
+		Tile current_tile = map[to_index(current->pos)];
+		TileID current_tile_id = current_tile.getID();
 		switch(current_tile_id) {
 			case BELT_UP:
 				addPoints(first, lane_a, current, length, belt_lane_offsets[LANE_A_UP]);

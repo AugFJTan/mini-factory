@@ -34,7 +34,7 @@ typedef enum BeltLane {
 class ItemPath {
 public:
 	ItemPath();
-	void update(std::vector<uPtr<Tile>>& map, std::vector<std::vector<SDL_Point>>& belt_lane_offsets, Node* path);
+	void update(Tile map[], std::vector<std::vector<SDL_Point>>& belt_lane_offsets, Node* path);
 	void drawLaneA(SDL_Renderer* renderer);
 	void drawLaneB(SDL_Renderer* renderer);
 	void drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance);
