@@ -18,12 +18,12 @@ class Path {
 public:
 	Path();
 	void setTileType(SDL_Point pos, TileType type);
-	void traverse(std::vector<uPtr<AnimatedTile>>& map);
+	void traverse(std::vector<uPtr<Tile>>& map);
 	std::vector<Node*> getPaths();
 
 private:
 	Node m_nodes[MAP_WIDTH * MAP_HEIGHT];
-	void traversePath(std::vector<uPtr<AnimatedTile>>& map, Node* start);
+	void traversePath(std::vector<uPtr<Tile>>& map, Node* start);
 };
 
 #endif

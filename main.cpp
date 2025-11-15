@@ -2,7 +2,6 @@
 #include "Animation.h"
 #include "AnimationFrames.h"
 #include "TileID.h"
-#include "Belt.h"
 #include "Pathfinding.h"
 #include "ItemPath.h"
 
@@ -22,7 +21,7 @@ SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
 	return rect;
 }
 
-void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID>& animation_lookup,
+void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID>& tile_lookup,
 	sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
 	std::ifstream file;
 	file.open("../config/anim_belt.txt");
@@ -30,7 +29,7 @@ void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID
 	std::string data;
 	bool first_line = true;
 	int frames, fps;
-	std::string anim_id;
+	std::string tile_id;
 	int x, y;
 	int n = 0;
 
@@ -46,30 +45,30 @@ void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID
 			std::cout << "Frames = " << frames << ", FPS = " << fps << std::endl;
 			first_line = false;
 		} else {
-			ss >> anim_id >> x >> y;
+			ss >> tile_id >> x >> y;
 			SDL_Point pos = {x, y};
 			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, pos));
-			animation_lookup[anim_id] = static_cast<TileID>(n++);
-			std::cout << anim_id << " @ (" << x << ", " << y << ")" << std::endl;
+			tile_lookup[tile_id] = static_cast<TileID>(n++);
+			std::cout << tile_id << " @ (" << x << ", " << y << ")" << std::endl;
 		}
 	}
 }
 
-void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::string, TileID>& animation_lookup, Path& path) {
+void parse_layout_file(std::vector<uPtr<Tile>>& map, std::map<std::string, TileID>& tile_lookup, Path& path) {
 	std::ifstream file;
 	file.open("../config/layout.txt");
 
 	std::string data;
-	std::string anim_id;
+	std::string tile_id;
 	int x, y;
 
 	while (std::getline(file, data)) {
 		std::istringstream ss(data);
-		ss >> anim_id >> x >> y;
+		ss >> tile_id >> x >> y;
 		SDL_Point pos = {x, y};
-		map[to_index(pos)] = std::make_unique<Belt>(animation_lookup[anim_id]);
+		map[to_index(pos)] = std::make_unique<AnimatedTile>(BELT, tile_lookup[tile_id]);
 		path.setTileType(pos, BELT);
-		std::cout << anim_id << " " << "(" << x << ", " << y << ")" << std::endl;
+		std::cout << tile_id << " " << "(" << x << ", " << y << ")" << std::endl;
 	}
 }
 
@@ -142,12 +141,12 @@ int main(int argc, char* args[]) {
 
 	sPtr<AnimationFrames> belt_anim_frames;
 	std::vector<uPtr<Animation>> belt_animations;
-	std::map<std::string, TileID> animation_lookup;
-	std::vector<uPtr<AnimatedTile>> map(MAP_WIDTH * MAP_HEIGHT);
+	std::map<std::string, TileID> tile_lookup;
+	std::vector<uPtr<Tile>> map(MAP_WIDTH * MAP_HEIGHT);
 	Path path;
 
-	parse_animation_file(&spritesheet, animation_lookup, belt_anim_frames, belt_animations);
-	parse_layout_file(map, animation_lookup, path);
+	parse_animation_file(&spritesheet, tile_lookup, belt_anim_frames, belt_animations);
+	parse_layout_file(map, tile_lookup, path);
 
 	path.traverse(map);
 	std::vector<Node*> belt_paths = path.getPaths();
@@ -191,10 +190,11 @@ int main(int argc, char* args[]) {
 
 		belt_anim_frames->update(start);
 
+		// TODO: Optimise tile check
 		for (int y = 0; y < MAP_HEIGHT; y++) {
 			for (int x = 0; x < MAP_WIDTH; x++) {
 				SDL_Point pos = {x, y};
-				Belt *belt = static_cast<Belt*>(map[to_index(pos)].get());
+				AnimatedTile *belt = static_cast<AnimatedTile*>(map[to_index(pos)].get());
 				if (belt == nullptr)
 					continue;
 				SDL_Rect dst = world_to_screen(pos, scale, length);

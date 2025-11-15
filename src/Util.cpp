@@ -13,32 +13,32 @@ int calc_distance(SDL_Point a, SDL_Point b) {
 	return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-bool belt_forward_connected(SDL_Point pos_a, TileID anim_a, SDL_Point pos_b, TileID anim_b) {
+bool belt_forward_connected(SDL_Point pos_a, TileID tile_a, SDL_Point pos_b, TileID tile_b) {
 	bool result = false;
-	switch(anim_a) {
+	switch(tile_a) {
 		case BELT_UP:
 		case BELT_LEFT_UP:
 		case BELT_RIGHT_UP:
 			result = (pos_b.x == pos_a.x && pos_b.y == pos_a.y-1) &&
-				(anim_b == BELT_UP || anim_b == BELT_UP_LEFT || anim_b == BELT_UP_RIGHT);
+				(tile_b == BELT_UP || tile_b == BELT_UP_LEFT || tile_b == BELT_UP_RIGHT);
 			break;
 		case BELT_DOWN:
 		case BELT_LEFT_DOWN:
 		case BELT_RIGHT_DOWN:
 			result = (pos_b.x == pos_a.x && pos_b.y == pos_a.y+1) &&
-				(anim_b == BELT_DOWN || anim_b == BELT_DOWN_LEFT || anim_b == BELT_DOWN_RIGHT);
+				(tile_b == BELT_DOWN || tile_b == BELT_DOWN_LEFT || tile_b == BELT_DOWN_RIGHT);
 			break;
 		case BELT_LEFT:
 		case BELT_UP_LEFT:
 		case BELT_DOWN_LEFT:
 			result = (pos_b.x == pos_a.x-1 && pos_b.y == pos_a.y) &&
-				(anim_b == BELT_LEFT || anim_b == BELT_LEFT_UP || anim_b == BELT_LEFT_DOWN);
+				(tile_b == BELT_LEFT || tile_b == BELT_LEFT_UP || tile_b == BELT_LEFT_DOWN);
 			break;
 		case BELT_RIGHT:
 		case BELT_UP_RIGHT:
 		case BELT_DOWN_RIGHT:
 			result = (pos_b.x == pos_a.x+1 && pos_b.y == pos_a.y) &&
-				(anim_b == BELT_RIGHT || anim_b == BELT_RIGHT_UP || anim_b == BELT_RIGHT_DOWN);
+				(tile_b == BELT_RIGHT || tile_b == BELT_RIGHT_UP || tile_b == BELT_RIGHT_DOWN);
 			break;
 		default:
 			break;

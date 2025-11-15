@@ -7,7 +7,6 @@
 class AnimatedTile : public Tile {
 public:
 	AnimatedTile(TileType type, TileID animation_id);
-	virtual ~AnimatedTile() = default;
 	TileID getAnimationID();
 
 private:
