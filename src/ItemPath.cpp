@@ -1,14 +1,6 @@
 #include "ItemPath.h"
 #include "Util.h"
 
-SDL_Point midpoint(SDL_Rect *item_frame) {
-	return {item_frame->w / 2, item_frame->h / 2};
-}
-
-int calc_distance(SDL_Point a, SDL_Point b) {
-	return abs(a.x - b.x) + abs(a.y - b.y);
-}
-
 ItemPath::ItemPath() {
 }
 
@@ -26,8 +18,8 @@ void ItemPath::addPoints(bool first, bool lane_a, Node* node, int length, std::v
 
 void ItemPath::update(std::vector<uPtr<AnimatedTile>>& map, std::vector<std::vector<SDL_Point>>& belt_lane_offsets, Node* path) {
 	Node* current = path;
-	AnimationID start_anim = map[to_index(current->pos)]->getAnimationID();
-	AnimationID previous_anim = start_anim;
+	TileID start_anim = map[to_index(current->pos)]->getAnimationID();
+	TileID previous_anim = start_anim;
 
 	int length = 32;
 
@@ -35,7 +27,7 @@ void ItemPath::update(std::vector<uPtr<AnimatedTile>>& map, std::vector<std::vec
 	bool lane_a = true, lane_b = false;
 
 	while(current != nullptr) {
-		AnimationID current_anim = map[to_index(current->pos)]->getAnimationID();
+		TileID current_anim = map[to_index(current->pos)]->getAnimationID();
 		switch(current_anim) {
 			case BELT_UP:
 				addPoints(first, lane_a, current, length, belt_lane_offsets[LANE_A_UP]);
@@ -124,16 +116,15 @@ void ItemPath::drawLaneB(SDL_Renderer* renderer) {
 	drawLane(m_lane_b, renderer);
 }
 
-void ItemPath::drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance) {
-	drawItem(m_lane_a, renderer, texture, item_frame, distance);
+void ItemPath::drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_rect, int distance) {
+	drawItem(m_lane_a, renderer, texture, item_rect, distance);
 }
 
-void ItemPath::drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance) {
-	drawItem(m_lane_b, renderer, texture, item_frame, distance);
+void ItemPath::drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_rect, int distance) {
+	drawItem(m_lane_b, renderer, texture, item_rect, distance);
 }
 
-void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance) {
-	SDL_Point m = midpoint(item_frame);
+void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_rect, int distance) {
 	int scale = 2;
 
 	int index = -1;
@@ -167,10 +158,10 @@ void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SD
 	}
 
 	SDL_Rect dst;
-	dst.x = current.x + dx - m.x;
-	dst.y = current.y + dy - m.y;
-	dst.w = item_frame->w;
-	dst.h = item_frame->h;
+	dst.x = current.x + dx - (item_rect->w / 2);
+	dst.y = current.y + dy - (item_rect->h / 2);
+	dst.w = item_rect->w;
+	dst.h = item_rect->h;
 
 	// printf("(%i, %i)\n", dst.x, dst.y);
 
@@ -179,5 +170,5 @@ void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SD
 	dst.w *= scale;
 	dst.h *= scale;
 
-	SDL_RenderCopy(renderer, texture, item_frame, &dst);
+	SDL_RenderCopy(renderer, texture, item_rect, &dst);
 }

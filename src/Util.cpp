@@ -9,7 +9,11 @@ bool valid_pos(SDL_Point pos) {
 		(pos.y >= 0 && pos.y <= MAP_HEIGHT-1);
 }
 
-bool belt_forward_connected(SDL_Point pos_a, AnimationID anim_a, SDL_Point pos_b, AnimationID anim_b) {
+int calc_distance(SDL_Point a, SDL_Point b) {
+	return abs(a.x - b.x) + abs(a.y - b.y);
+}
+
+bool belt_forward_connected(SDL_Point pos_a, TileID anim_a, SDL_Point pos_b, TileID anim_b) {
 	bool result = false;
 	switch(anim_a) {
 		case BELT_UP:

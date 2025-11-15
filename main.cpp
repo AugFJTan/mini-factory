@@ -1,7 +1,7 @@
 #include "Mini_Factory.h"
 #include "Animation.h"
 #include "AnimationFrames.h"
-#include "AnimationID.h"
+#include "TileID.h"
 #include "Belt.h"
 #include "Pathfinding.h"
 #include "ItemPath.h"
@@ -22,7 +22,7 @@ SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
 	return rect;
 }
 
-void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, AnimationID>& animation_lookup,
+void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID>& animation_lookup,
 	sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
 	std::ifstream file;
 	file.open("../config/anim_belt.txt");
@@ -49,13 +49,13 @@ void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, Animat
 			ss >> anim_id >> x >> y;
 			SDL_Point pos = {x, y};
 			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, pos));
-			animation_lookup[anim_id] = static_cast<AnimationID>(n++);
+			animation_lookup[anim_id] = static_cast<TileID>(n++);
 			std::cout << anim_id << " @ (" << x << ", " << y << ")" << std::endl;
 		}
 	}
 }
 
-void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::string, AnimationID>& animation_lookup, Path& path) {
+void parse_layout_file(std::vector<uPtr<AnimatedTile>>& map, std::map<std::string, TileID>& animation_lookup, Path& path) {
 	std::ifstream file;
 	file.open("../config/layout.txt");
 
@@ -142,7 +142,7 @@ int main(int argc, char* args[]) {
 
 	sPtr<AnimationFrames> belt_anim_frames;
 	std::vector<uPtr<Animation>> belt_animations;
-	std::map<std::string, AnimationID> animation_lookup;
+	std::map<std::string, TileID> animation_lookup;
 	std::vector<uPtr<AnimatedTile>> map(MAP_WIDTH * MAP_HEIGHT);
 	Path path;
 

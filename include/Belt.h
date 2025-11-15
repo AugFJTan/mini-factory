@@ -5,7 +5,7 @@
 
 class Belt : public AnimatedTile {
 public:
-	Belt(AnimationID animation_id);
+	Belt(TileID animation_id);
 };
 
 #endif

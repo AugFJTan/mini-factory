@@ -37,7 +37,7 @@ void Path::traversePath(std::vector<uPtr<AnimatedTile>>& map, Node* start) {
 		queue.pop();
 
 		current->visited = true;
-		AnimationID current_anim = map[to_index(current->pos)]->getAnimationID();
+		TileID current_anim = map[to_index(current->pos)]->getAnimationID();
 
 		SDL_Point neighbours[4] = {
 			{current->pos.x, current->pos.y-1},
@@ -53,7 +53,7 @@ void Path::traversePath(std::vector<uPtr<AnimatedTile>>& map, Node* start) {
 					Node* next = &m_nodes[to_index(adjacent)];
 					if (next == start)  // Prevent loop
 						continue;
-					AnimationID next_anim = map[to_index(next->pos)]->getAnimationID();
+					TileID next_anim = map[to_index(next->pos)]->getAnimationID();
 					if (belt_forward_connected(current->pos, current_anim, next->pos, next_anim)) {
 						printf("(%i, %i) is forward connected to (%i, %i)\n", current->pos.x, current->pos.y, next->pos.x, next->pos.y);
 						current->next = next;

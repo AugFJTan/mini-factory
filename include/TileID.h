@@ -1,7 +1,7 @@
-#ifndef MINI_FACTORY_ANIMATION_ID_H_
-#define MINI_FACTORY_ANIMATION_ID_H_
+#ifndef MINI_FACTORY_TILE_ID_H_
+#define MINI_FACTORY_TILE_ID_H_
 
-typedef enum AnimationID {
+typedef enum TileID {
 	BELT_UP,
 	BELT_DOWN,
 	BELT_LEFT,
@@ -14,6 +14,6 @@ typedef enum AnimationID {
 	BELT_LEFT_DOWN,
 	BELT_RIGHT_UP,
 	BELT_RIGHT_DOWN
-} AnimationID;
+} TileID;
 
 #endif
