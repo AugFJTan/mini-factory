@@ -12,15 +12,6 @@
 #include <map>
 #include "Util.h"
 
-SDL_Rect world_to_screen(SDL_Point pos, int scale, int length) {
-	SDL_Rect rect;
-	rect.x = pos.x * scale * length;
-	rect.y = pos.y * scale * length;
-	rect.w = scale * length;
-	rect.h = scale * length;
-	return rect;
-}
-
 void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID>& tile_lookup,
 	sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
 	std::ifstream file;
@@ -46,8 +37,8 @@ void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID
 			first_line = false;
 		} else {
 			ss >> tile_id >> x >> y;
-			SDL_Point pos = {x, y};
-			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, pos));
+			SDL_Rect rect = {x, y, 32, 32};
+			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, rect));
 			tile_lookup[tile_id] = static_cast<TileID>(n++);
 			std::cout << tile_id << " @ (" << x << ", " << y << ")" << std::endl;
 		}
@@ -137,7 +128,7 @@ int main(int argc, char* args[]) {
 	spritesheet.texture = texture;
 	spritesheet.cols = 10;
 	spritesheet.rows = 118;
-	spritesheet.length = 32;
+	spritesheet.cell_length = 32;
 
 	sPtr<AnimationFrames> belt_anim_frames;
 	std::vector<uPtr<Animation>> belt_animations;
@@ -164,7 +155,7 @@ int main(int argc, char* args[]) {
 	int total_distance = item_paths[0].getTotalDistance();
 
 	int scale = 2;
-	int length = spritesheet.length;
+	int length = spritesheet.cell_length;
 
 	SDL_Rect item_rect = {3 * length, 2 * length, 12, 11};
 	float distance = 0;
@@ -196,8 +187,7 @@ int main(int argc, char* args[]) {
 				Tile belt = map[to_index(pos)];
 				if (belt.getType() != BELT)
 					continue;
-				SDL_Rect dst = world_to_screen(pos, scale, length);
-				belt_animations[belt.getID()]->render(renderer, &dst);
+				belt_animations[belt.getID()]->render(renderer, scale, pos);
 			}
 		}
 
@@ -217,8 +207,8 @@ int main(int argc, char* args[]) {
 		}
 
 		for (int i = 0; i < item_paths.size(); i++) {
-			item_paths[i].drawLaneA(renderer);
-			item_paths[i].drawLaneB(renderer);
+			item_paths[i].drawLaneA(renderer, scale);
+			item_paths[i].drawLaneB(renderer, scale);
 		}
 
 		if (distance > total_distance)
@@ -227,8 +217,8 @@ int main(int argc, char* args[]) {
 		distance += (start - previous) / (1000.f / pixels_per_sec);
 		previous = start;
 
-		item_paths[0].drawItemLaneA(renderer, spritesheet.texture, &item_rect, (int)distance);
-		item_paths[0].drawItemLaneB(renderer, spritesheet.texture, &item_rect, (int)distance);
+		item_paths[0].drawItemLaneA(renderer, spritesheet.texture, scale, &item_rect, (int)distance);
+		item_paths[0].drawItemLaneB(renderer, spritesheet.texture, scale, &item_rect, (int)distance);
 
 		SDL_RenderPresent(renderer);
 

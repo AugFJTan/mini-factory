@@ -35,18 +35,18 @@ class ItemPath {
 public:
 	ItemPath();
 	void update(Tile map[], std::vector<std::vector<SDL_Point>>& belt_lane_offsets, Node* path);
-	void drawLaneA(SDL_Renderer* renderer);
-	void drawLaneB(SDL_Renderer* renderer);
-	void drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance);
-	void drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance);
+	void drawLaneA(SDL_Renderer* renderer, int scale);
+	void drawLaneB(SDL_Renderer* renderer, int scale);
+	void drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, int scale, SDL_Rect *item_frame, int distance);
+	void drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, int scale, SDL_Rect *item_frame, int distance);
 	int getTotalDistance();
 
 private:
 	std::vector<SDL_Point> m_lane_a;
 	std::vector<SDL_Point> m_lane_b;
 	void addPoints(bool first, bool lane_a, Node* node, int length, std::vector<SDL_Point>& offsets);
-	void drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_frame, int distance);
-	void drawLane(std::vector<SDL_Point>& lane, SDL_Renderer* renderer);
+	void drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, int scale, SDL_Rect *item_frame, int distance);
+	void drawLane(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, int scale);
 };
 
 #endif

@@ -8,18 +8,18 @@ struct Spritesheet {
 	SDL_Texture* texture;
 	int rows;
 	int cols;
-	int length;
+	int cell_length;
 };
 
 class Animation {
 public:
-	Animation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, SDL_Point pos);
-	void render(SDL_Renderer* renderer, SDL_Rect* dst);
+	Animation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, SDL_Rect rect);
+	void render(SDL_Renderer* renderer, int scale, SDL_Point pos);
 
 private:
 	Spritesheet* m_spritesheet;
 	sPtr<AnimationFrames> m_animation_frames;
-	SDL_Point m_pos;
+	SDL_Rect m_rect;
 };
 
 #endif

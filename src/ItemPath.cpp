@@ -95,8 +95,7 @@ int ItemPath::getTotalDistance() {
 	return total_distance;
 }
 
-void ItemPath::drawLane(std::vector<SDL_Point>& lane, SDL_Renderer* renderer) {
-	int scale = 2;
+void ItemPath::drawLane(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, int scale) {
 	SDL_Point previous = lane[0];
 	for (int i = 1; i < lane.size(); i++) {
 		SDL_Point current = lane[i];
@@ -107,27 +106,25 @@ void ItemPath::drawLane(std::vector<SDL_Point>& lane, SDL_Renderer* renderer) {
 	}
 }
 
-void ItemPath::drawLaneA(SDL_Renderer* renderer) {
+void ItemPath::drawLaneA(SDL_Renderer* renderer, int scale) {
 	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
-	drawLane(m_lane_a, renderer);
+	drawLane(m_lane_a, renderer, scale);
 }
 
-void ItemPath::drawLaneB(SDL_Renderer* renderer) {
+void ItemPath::drawLaneB(SDL_Renderer* renderer, int scale) {
 	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0xff, 0xff);
-	drawLane(m_lane_b, renderer);
+	drawLane(m_lane_b, renderer, scale);
 }
 
-void ItemPath::drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_rect, int distance) {
-	drawItem(m_lane_a, renderer, texture, item_rect, distance);
+void ItemPath::drawItemLaneA(SDL_Renderer* renderer, SDL_Texture* texture, int scale, SDL_Rect *item_rect, int distance) {
+	drawItem(m_lane_a, renderer, texture, scale, item_rect, distance);
 }
 
-void ItemPath::drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_rect, int distance) {
-	drawItem(m_lane_b, renderer, texture, item_rect, distance);
+void ItemPath::drawItemLaneB(SDL_Renderer* renderer, SDL_Texture* texture, int scale, SDL_Rect *item_rect, int distance) {
+	drawItem(m_lane_b, renderer, texture, scale, item_rect, distance);
 }
 
-void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect *item_rect, int distance) {
-	int scale = 2;
-
+void ItemPath::drawItem(std::vector<SDL_Point>& lane, SDL_Renderer* renderer, SDL_Texture* texture, int scale, SDL_Rect *item_rect, int distance) {
 	int index = -1;
 	int offset = 0;
 	for (int i = 0; i < lane.size()-1; i++) {
