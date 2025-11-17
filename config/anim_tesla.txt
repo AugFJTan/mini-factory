@@ -1,0 +1,14 @@
+# Frames, FPS, Loop
+8 12 False
+
+# Width, Height
+3 1
+
+# Class
+MachineAnimation
+
+# Particle effect
+electric_discharge
+
+# ID, X, Y, X Offset, Y Offset
+MACHINE_TESLA 3 27 -1 0

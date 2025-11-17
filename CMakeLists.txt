@@ -3,8 +3,10 @@ project(Mini_Factory VERSION 0.1.0 LANGUAGES C CXX)
 
 add_executable(Mini_Factory
                src/main.cpp
+               src/FileUtil.cpp
                src/Util.cpp
                src/Animation.cpp
+               src/MachineAnimation.cpp
                src/AnimationFrames.cpp
                src/Tile.cpp
                src/Pathfinding.cpp

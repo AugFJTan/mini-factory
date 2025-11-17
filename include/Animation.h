@@ -14,11 +14,13 @@ struct Spritesheet {
 class Animation {
 public:
 	Animation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, SDL_Rect rect);
-	void render(SDL_Renderer* renderer, int scale, SDL_Point pos);
+	virtual void render(SDL_Renderer* renderer, int scale, SDL_Point pos);
 
-private:
+protected:
 	Spritesheet* m_spritesheet;
 	sPtr<AnimationFrames> m_animation_frames;
+
+private:
 	SDL_Rect m_rect;
 };
 

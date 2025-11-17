@@ -1,95 +1,13 @@
 #include "Mini_Factory.h"
 #include "Animation.h"
+#include "MachineAnimation.h"
 #include "AnimationFrames.h"
 #include "TileID.h"
 #include "Pathfinding.h"
 #include "ItemPath.h"
 
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <map>
+#include "FileUtil.h"
 #include "Util.h"
-
-void parse_animation_file(Spritesheet* spritesheet, std::map<std::string, TileID>& tile_lookup,
-	sPtr<AnimationFrames>& animation_frames, std::vector<uPtr<Animation>>& animations) {
-	std::ifstream file;
-	file.open("../config/anim_belt.txt");
-
-	std::string data;
-	bool first_line = true;
-	int frames, fps;
-	std::string tile_id;
-	int x, y;
-	int n = 0;
-
-	while (std::getline(file, data)) {
-		if (data == "")
-			continue;
-		if (data[0] == '#')
-			continue;
-		std::istringstream ss(data);
-		if (first_line) {
-			ss >> frames >> fps;
-			animation_frames = std::make_shared<AnimationFrames>(frames, fps);
-			std::cout << "Frames = " << frames << ", FPS = " << fps << std::endl;
-			first_line = false;
-		} else {
-			ss >> tile_id >> x >> y;
-			SDL_Rect rect = {x, y, 32, 32};
-			animations.push_back(std::make_unique<Animation>(spritesheet, animation_frames, rect));
-			tile_lookup[tile_id] = static_cast<TileID>(n++);
-			std::cout << tile_id << " @ (" << x << ", " << y << ")" << std::endl;
-		}
-	}
-}
-
-void parse_layout_file(Tile map[], std::map<std::string, TileID>& tile_lookup, Path& path) {
-	std::ifstream file;
-	file.open("../config/layout.txt");
-
-	std::string data;
-	std::string tile_id;
-	int x, y;
-
-	while (std::getline(file, data)) {
-		std::istringstream ss(data);
-		ss >> tile_id >> x >> y;
-		SDL_Point pos = {x, y};
-		Tile belt(BELT, tile_lookup[tile_id]);
-		map[to_index(pos)] = belt;
-		std::cout << tile_id << " " << "(" << x << ", " << y << ")" << std::endl;
-	}
-}
-
-void parse_item_lanes_file(std::vector<std::vector<SDL_Point>>& belt_lane_offsets) {
-	std::ifstream file;
-	file.open("../config/item_lanes.txt");
-
-	std::string data;
-	std::string lane_id, points;
-
-	while (std::getline(file, data)) {
-		std::istringstream ss(data);
-		ss >> lane_id >> points;
-		std::cout << "Lane: " << lane_id << " Pos: " << points << std::endl;
-		size_t idx = 0, lbracket = 0, rbracket = 0;
-		std::vector<SDL_Point> offsets;
-		while(idx < points.length()) {
-			lbracket = points.find('(', idx);
-			rbracket = points.find(')', idx);
-			std::string coord = points.substr(lbracket+1, rbracket-lbracket-1);
-			size_t comma = coord.find(',');
-			SDL_Point pos;
-			pos.x = std::stoi(coord.substr(0, comma));
-			pos.y = std::stoi(coord.substr(comma+1));
-			offsets.push_back(pos);
-			idx = rbracket + 2;
-		}
-		belt_lane_offsets.push_back(offsets);
-	}
-}
 
 int main(int argc, char* args[]) {
 	SDL_Window* window = NULL;
@@ -131,12 +49,14 @@ int main(int argc, char* args[]) {
 	spritesheet.cell_length = 32;
 
 	sPtr<AnimationFrames> belt_anim_frames;
-	std::vector<uPtr<Animation>> belt_animations;
+	sPtr<AnimationFrames> tesla_anim_frames;
+	std::vector<uPtr<Animation>> animations;
 	std::map<std::string, TileID> tile_lookup;
 	Tile map[MAP_WIDTH * MAP_HEIGHT];
 	Path path;
 
-	parse_animation_file(&spritesheet, tile_lookup, belt_anim_frames, belt_animations);
+	parse_animation_file("../config/anim_belt.txt", BELT_UP, &spritesheet, tile_lookup, belt_anim_frames, animations);
+	parse_animation_file("../config/anim_tesla.txt", MACHINE_TESLA, &spritesheet, tile_lookup, tesla_anim_frames, animations);
 	parse_layout_file(map, tile_lookup, path);
 
 	path.traverse(map);
@@ -162,6 +82,8 @@ int main(int argc, char* args[]) {
 	Uint64 previous = SDL_GetTicks64();
 	int pixels_per_sec = 45;
 
+	int tesla_pause = 0;
+
 	while (!quit) {
 		while (SDL_PollEvent(&event)) {
 			switch(event.type) {
@@ -179,7 +101,14 @@ int main(int argc, char* args[]) {
 		SDL_SetRenderDrawColor(renderer, 0x7f, 0x7f, 0x7f, 0xff);  // Background
 		SDL_RenderClear(renderer);
 
+		tesla_pause += start - previous;
+		if (tesla_pause > 1000) {
+			tesla_pause = 0;
+			tesla_anim_frames->playOnce();
+		}
+
 		belt_anim_frames->update(start);
+		tesla_anim_frames->update(start);
 
 		for (int y = 0; y < MAP_HEIGHT; y++) {
 			for (int x = 0; x < MAP_WIDTH; x++) {
@@ -187,7 +116,7 @@ int main(int argc, char* args[]) {
 				Tile belt = map[to_index(pos)];
 				if (belt.getType() != BELT)
 					continue;
-				belt_animations[belt.getID()]->render(renderer, scale, pos);
+				animations[belt.getID()]->render(renderer, scale, pos);
 			}
 		}
 
@@ -219,6 +148,9 @@ int main(int argc, char* args[]) {
 
 		item_paths[0].drawItemLaneA(renderer, spritesheet.texture, scale, &item_rect, (int)distance);
 		item_paths[0].drawItemLaneB(renderer, spritesheet.texture, scale, &item_rect, (int)distance);
+
+		SDL_Point pos = {5, 4};
+		animations[MACHINE_TESLA]->render(renderer, scale, pos);
 
 		SDL_RenderPresent(renderer);
 

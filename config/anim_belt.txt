@@ -1,5 +1,14 @@
-# Frames, FPS
-4 12
+# Frames, FPS, Loop
+4 12 True
+
+# Width, Height
+1 1
+
+# Class
+Animation
+
+# Particle effect
+None
 
 # ID, X, Y
 BELT_UP 2 6
