@@ -50,6 +50,7 @@ int main(int argc, char* args[]) {
 
 	sPtr<AnimationFrames> belt_anim_frames;
 	sPtr<AnimationFrames> tesla_anim_frames;
+	sPtr<AnimationFrames> oven_anim_frames;
 	std::vector<uPtr<Animation>> animations;
 	std::map<std::string, TileID> tile_lookup;
 	Tile map[MAP_WIDTH * MAP_HEIGHT];
@@ -57,6 +58,7 @@ int main(int argc, char* args[]) {
 
 	parse_animation_file("../config/anim_belt.txt", BELT_UP, &spritesheet, tile_lookup, belt_anim_frames, animations);
 	parse_animation_file("../config/anim_tesla.txt", MACHINE_TESLA, &spritesheet, tile_lookup, tesla_anim_frames, animations);
+	parse_animation_file("../config/anim_oven.txt", MACHINE_OVEN, &spritesheet, tile_lookup, oven_anim_frames, animations);
 	parse_layout_file(map, tile_lookup, path);
 
 	path.traverse(map);
@@ -109,6 +111,7 @@ int main(int argc, char* args[]) {
 
 		belt_anim_frames->update(start);
 		tesla_anim_frames->update(start);
+		oven_anim_frames->update(start);
 
 		for (int y = 0; y < MAP_HEIGHT; y++) {
 			for (int x = 0; x < MAP_WIDTH; x++) {
@@ -151,6 +154,9 @@ int main(int argc, char* args[]) {
 
 		SDL_Point pos = {5, 4};
 		animations[MACHINE_TESLA]->render(renderer, scale, pos);
+
+		SDL_Point pos2 = {7, 4};
+		animations[MACHINE_OVEN]->render(renderer, scale, pos2);
 
 		SDL_RenderPresent(renderer);
 

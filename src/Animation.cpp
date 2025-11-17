@@ -10,7 +10,7 @@ void Animation::render(SDL_Renderer* renderer, int scale, SDL_Point pos) {
 
 	SDL_Rect src;
 	src.x = ((m_rect.x + last_frame * m_rect.w) % cells_per_row) * m_spritesheet->cell_length;
-	src.y = (m_rect.y + (m_rect.x + last_frame * m_rect.w) / cells_per_row) * m_spritesheet->cell_length;
+	src.y = (m_rect.y + (m_rect.x + last_frame * m_rect.w) / cells_per_row * m_rect.h) * m_spritesheet->cell_length;
 	src.w = m_rect.w * m_spritesheet->cell_length;
 	src.h = m_rect.h * m_spritesheet->cell_length;
 

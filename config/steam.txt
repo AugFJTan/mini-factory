@@ -1,0 +1,8 @@
+# Start, End
+0 5
+
+# Width, Height
+3 1
+
+# X, Y, X Offset, Y Offset
+0 42 -1 -1
