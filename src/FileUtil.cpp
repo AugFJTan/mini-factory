@@ -10,6 +10,7 @@ void parse_animation_file(std::string filename, TileID start_tile_id, Spriteshee
 	int frames, fps;
 	std::string loop;
 	std::string animation_class;
+	bool has_particle_effect = false;
 	std::string particle_effect_id;
 	ParticleEffect particle_effect;
 	std::string tile_id;
@@ -40,7 +41,8 @@ void parse_animation_file(std::string filename, TileID start_tile_id, Spriteshee
 			case 3:
 				ss >> particle_effect_id;
 				std::cout << "Particle effect = " << particle_effect_id << std::endl;
-				if (particle_effect_id != "None")
+				has_particle_effect = particle_effect_id != "None";
+				if (has_particle_effect)
 					particle_effect = parse_particle_effect_file(particle_effect_id);
 				break;
 			default:
@@ -52,7 +54,7 @@ void parse_animation_file(std::string filename, TileID start_tile_id, Spriteshee
 					ss >> tile_id >> x >> y >> x_offset >> y_offset;
 					SDL_Rect rect = {x, y, width, height};
 					SDL_Point offset = {x_offset, y_offset};
-					animations.push_back(std::make_unique<MachineAnimation>(spritesheet, animation_frames, rect, offset, particle_effect));
+					animations.push_back(std::make_unique<MachineAnimation>(spritesheet, animation_frames, rect, offset, has_particle_effect, particle_effect));
 				}
 				tile_lookup[tile_id] = static_cast<TileID>(n++);
 				std::cout << tile_id << " @ (" << x << ", " << y << ")" << std::endl;

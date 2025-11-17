@@ -13,12 +13,12 @@ struct ParticleEffect {
 
 class MachineAnimation : public Animation {
 public:
-	MachineAnimation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, SDL_Rect rect, SDL_Point offset, ParticleEffect particle_effect);
+	MachineAnimation(Spritesheet* spritesheet, sPtr<AnimationFrames>& animation_frames, SDL_Rect rect, SDL_Point offset, bool has_particle_effect, ParticleEffect particle_effect);
 	void render(SDL_Renderer* renderer, int scale, SDL_Point pos) override;
 
 private:
 	SDL_Point m_offset;
-	ParticleEffect m_particle_effect;
+	uPtr<ParticleEffect> m_particle_effect;
 };
 
 #endif

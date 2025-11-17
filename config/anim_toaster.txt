@@ -8,7 +8,7 @@
 MachineAnimation
 
 # Particle effect
-oven_steam
+toaster_smoke
 
 # ID, X, Y, X Offset, Y Offset
-MACHINE_OVEN 0 36 -1 -1
+MACHINE_SLICER 0 16 -1 -1

@@ -1,14 +1,14 @@
 # Frames, FPS, Loop
-7 12 True
+8 12 True
 
 # Width, Height
-3 2
+3 1
 
 # Class
 MachineAnimation
 
 # Particle effect
-oven_steam
+None
 
 # ID, X, Y, X Offset, Y Offset
-MACHINE_OVEN 0 36 -1 -1
+MACHINE_SLICER 0 76 -1 0
